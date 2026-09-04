@@ -1,26 +1,28 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import Logo from '../../assets/logo.png';
-import bookCards from '../components/bookCards.js';
-import emptyBookShelf from '../components/emptyBookShelf.js';
+import BookCards from '../components/bookCards.js';
+import EmptyBookShelf from '../components/emptyBookShelf.js';
 
 export default function HomeScreen({ route, navigation }) {
+    const navigation = useNavigation();
+
     return (
         <SafeAreaView style={styles.main}>
             <View style={styles.header}>
-                <MaterialIcons name="menu" size={24} color="black" />
+                <MaterialIcons name="menu" size={32} color="#6A3B21" />
                 <Image source={Logo} style={styles.logo} />
-                <MaterialIcons name="person" size={24} color="black" />
+                <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
+                    <MaterialIcons name="person" size={32} color="#6A3B21" />
+                </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
-                <TouchableOpacity onPress={() => navigation.navigate('Create')}>
-                    <Text>Adicionar Novo Livro</Text>
-                </TouchableOpacity>
-                <Text style={styles.title}>Minha Biblioteca</Text>
+                <BookCards />
+                <EmptyBookShelf />
             </ScrollView>
         </SafeAreaView>
     );
@@ -36,7 +38,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: 16,
-        backgroundColor: '#fff',
         elevation: 4,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -44,8 +45,8 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
     },
     logo: {
-        width: 100,
-        height: 40,
+        width: 200,
+        height: 80,
         resizeMode: 'contain',
     },
     content: {
