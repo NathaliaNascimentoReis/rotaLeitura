@@ -17,7 +17,9 @@ export default function HomeScreen({ route, navigation }) {
             </View>
 
             <ScrollView contentContainerStyle={styles.content}>
-                {/* Aqui você renderizará o componente emptyBookShelf ou a lista de bookCards */}
+                <TouchableOpacity onPress={() => navigation.navigate('Create')}>
+                    <Text>Adicionar Novo Livro</Text>
+                </TouchableOpacity>
                 <Text style={styles.title}>Minha Biblioteca</Text>
             </ScrollView>
         </SafeAreaView>

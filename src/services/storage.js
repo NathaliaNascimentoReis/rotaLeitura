@@ -45,7 +45,7 @@ export async function clearAllMissions() {
     await AsyncStorage.removeItem(STORAGE_KEY);
   } catch (error) {
     console.error(
-      'Erro ao limpar informações do AsyncStorage:',
+      'Erro ao limpar informações no AsyncStorage:',
       error
     );
 
