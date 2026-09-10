@@ -14,7 +14,7 @@ import {
 
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { getMissions, saveMissions } from '../services/storage';
+import { getMissions, saveMissions } from '../services/storage.js';
 
 export default function CreateScreen({ navigation }) {
   const [titulo, setTitulo] = useState('');

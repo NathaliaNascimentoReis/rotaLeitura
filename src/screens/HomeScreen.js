@@ -8,8 +8,6 @@ import BookCards from '../components/bookCards.js';
 import EmptyBookShelf from '../components/emptyBookShelf.js';
 
 export default function HomeScreen({ route, navigation }) {
-    const navigation = useNavigation();
-
     return (
         <SafeAreaView style={styles.main}>
             <View style={styles.header}>
