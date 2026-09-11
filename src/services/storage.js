@@ -1,41 +1,94 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const STORAGE_KEY = '@rotaleitura: books';
+const STORAGE_KEY = '@rotaleitura:books';
 
-export async function getMissions() {
+// READ
+export const getBooks = async () => {
     try {
         const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-
-        if (jsonValue !== null) {
-            return JSON.parse(jsonValue);
-        }
-
+        return jsonValue != null ? JSON.parse(jsonValue) : [];
+    } catch (error) {
+        console.error('Erro ao ler os dados do AsyncStorage:', error);
         return [];
-    } catch (error) {
-        console.error('Erro ao ler informações do AsyncStorage:', error);
-
-        throw new Error('Não foi possível carregar as informações salvas.');
     }
-}
+};
 
-export async function saveMissions(missions) {
+// READ por ID
+export const getBookById = async (id) => {
     try {
-        const jsonValue = JSON.stringify(missions);
-
-        await AsyncStorage.setItem(STORAGE_KEY, jsonValue);
+        const books = await getBooks();
+        return books.find((item) => item.id === id) || null;
     } catch (error) {
-        console.error('Erro ao salvar informações no AsyncStorage:', error);
-
-        throw new Error('Não foi possível salvar as alterações no armazenamento.');
+        console.error('Erro ao buscar livro por ID:', error);
+        return null;
     }
-}
+};
 
-export async function clearAllMissions() {
+// CREATE
+export const saveBook = async (newBook) => {
+    try {
+        const currentBooks = await getBooks();
+
+        const itemToSave = {
+            id: newBook.id || Date.now().toString(),
+            createdAt: new Date().toISOString(),
+            ...newBook,
+        };
+
+        const updatedList = [...currentBooks, itemToSave];
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
+
+        return itemToSave;
+    } catch (error) {
+        console.error('Erro ao salvar no AsyncStorage:', error);
+        throw error;
+    }
+};
+
+// UPDATE
+
+export const updateBook = async (updatedBook) => {
+    try {
+        const currentBooks = await getBooks();
+
+        const updatedList = currentBooks.map((item) =>
+            item.id === updatedBook.id ? { ...item, ...updatedBook } : item,
+        );
+
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
+        return updatedBook;
+    } catch (error) {
+        console.error('Erro ao atualizar no AsyncStorage:', error);
+        throw error;
+    }
+};
+
+// DELETE
+export const deleteBook = async (id) => {
+    try {
+        const currentBooks = await getBooks();
+        const updatedList = currentBooks.filter((item) => item.id !== id);
+
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
+        return true;
+    } catch (error) {
+        console.error('Erro ao remover do AsyncStorage:', error);
+        throw error;
+    }
+};
+
+// Apagar tudo
+export const clearStorage = async () => {
     try {
         await AsyncStorage.removeItem(STORAGE_KEY);
     } catch (error) {
-        console.error('Erro ao limpar informações no AsyncStorage:', error);
-
-        throw new Error('Não foi possível limpar o armazenamento.');
+        console.error('Erro ao limpar storage:', error);
     }
-}
+};
+
+// Evita que o app quebre se alguma tela antiga ainda importar "getMissions" ou "saveMissions"
+export const getMissions = getBooks;
+export const saveMissions = async (list) => {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+};
+export const clearAllMissions = clearStorage;
