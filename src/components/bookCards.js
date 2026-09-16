@@ -48,7 +48,6 @@ export default function BookCards() {
                   </View>
                 )}
 
-                {/* DETALHES E AÇÕES */}
                 <View style={styles.cardInfo}>
                   <View style={styles.infoTextContainer}>
                     <Text style={styles.cardTitulo} numberOfLines={2}>
@@ -59,16 +58,14 @@ export default function BookCards() {
                       {livro.autor}
                     </Text>
 
-                    {/* BADGE DE STATUS */}
                     <View style={styles.statusBadge}>
                       <Text style={styles.statusText}>{livro.status}</Text>
                     </View>
                   </View>
 
-                  {/* ÍCONE DE EDIÇÃO */}
                   <TouchableOpacity
                     style={styles.editButton}
-                    onPress={() => navigation.navigate('Create', { livroId: livro.id })}
+                    onPress={() => navigation.navigate('Edit', { livroId: livro.id })}
                   >
                     <Ionicons name="pencil-outline" size={20} color="#222" />
                   </TouchableOpacity>
@@ -78,7 +75,6 @@ export default function BookCards() {
           </View>
         )}
 
-        {/* BOTÃO ADICIONAR LIVRO */}
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate('Create')}
