@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,58 +9,49 @@ import {
   Image,
   Alert,
   Modal,
-} from 'react-native';
+} from "react-native";
 
-import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+
+import { updateBook, deleteBook } from "../services/storage";
 
 export default function EditBookScreen({ navigation, route }) {
   const livro = route?.params?.book || {};
 
-  const [titulo, setTitulo] = useState(
-    livro.titulo || 'Leitura de verão'
-  );
+  const [titulo, setTitulo] = useState(livro.titulo || "Leitura de verão");
 
-  const [autor, setAutor] = useState(
-    livro.autor || 'Emily Henry'
-  );
+  const [autor, setAutor] = useState(livro.autor || "Emily Henry");
 
-  const [categoria, setCategoria] = useState(
-    livro.categoria || 'Romance'
-  );
+  const [categoria, setCategoria] = useState(livro.categoria || "Romance");
 
-  const [status, setStatus] = useState(
-    livro.status || 'Lendo'
-  );
+  const [status, setStatus] = useState(livro.status || "Lendo");
 
   const [dataInicio, setDataInicio] = useState(
-    livro.dataInicio || '04/09/2026'
+    livro.dataInicio || "04/09/2026",
   );
 
   const [notas, setNotas] = useState(
-    livro.notas || 'Muito bom o livro, estou gostando!'
+    livro.notas || "Muito bom o livro, estou gostando!",
   );
 
-  const [capa, setCapa] = useState(
-    livro.capa || null
-  );
+  const [capa, setCapa] = useState(livro.capa || null);
 
   const [modalStatus, setModalStatus] = useState(false);
 
   const escolherCapa = async () => {
-    const permissao =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissao = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissao.granted) {
       Alert.alert(
-        'Permissão necessária',
-        'Precisamos de acesso à galeria para alterar a capa.'
+        "Permissão necessária",
+        "Precisamos de acesso à galeria para alterar a capa.",
       );
       return;
     }
 
     const resultado = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [2, 3],
       quality: 1,
@@ -70,61 +61,77 @@ export default function EditBookScreen({ navigation, route }) {
       setCapa(resultado.assets[0].uri);
     }
   };
-
-  const salvarAlteracoes = () => {
+  const salvarAlteracoes = async () => {
     if (!titulo.trim() || !autor.trim()) {
-      Alert.alert(
-        'Atenção',
-        'Preencha o título e o autor.'
-      );
+      Alert.alert("Atenção", "Preencha o título e o autor.");
+
       return;
     }
 
-    const livroAtualizado = {
-      ...livro,
-      titulo,
-      autor,
-      categoria,
-      status,
-      dataInicio,
-      notas,
-      capa,
-    };
+    try {
+      const livroAtualizado = {
+        ...livro,
 
-    console.log('Livro atualizado:', livroAtualizado);
+        titulo: titulo.trim(),
+        autor: autor.trim(),
+        categoria: categoria.trim(),
+        status,
+        dataInicio: dataInicio.trim(),
+        notas: notas.trim(),
+        capa,
+      };
 
-    Alert.alert(
-      'Pronto!',
-      'Alterações salvas com sucesso.',
-      [
+      await updateBook(livroAtualizado);
+
+      Alert.alert("Pronto!", "Alterações salvas com sucesso.", [
         {
-          text: 'OK',
+          text: "OK",
           onPress: () => navigation.goBack(),
         },
-      ]
-    );
+      ]);
+    } catch (error) {
+      console.error("Erro ao atualizar livro:", error);
+
+      Alert.alert("Erro", "Não foi possível salvar as alterações.");
+    }
   };
 
   const excluirLivro = () => {
     Alert.alert(
-      'Excluir livro',
-      'Tem certeza que deseja excluir este livro?',
+      "Excluir livro",
+      `Tem certeza que deseja excluir "${livro.titulo}"?`,
       [
         {
-          text: 'Cancelar',
-          style: 'cancel',
+          text: "Cancelar",
+          style: "cancel",
         },
 
         {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: () => {
-            console.log('Excluir livro:', livro);
+          text: "Excluir",
+          style: "destructive",
 
-            navigation.goBack();
+          onPress: async () => {
+            try {
+              await deleteBook(livro.id);
+
+              Alert.alert(
+                "Livro excluído",
+                "O livro foi removido da sua estante.",
+                [
+                  {
+                    text: "OK",
+                    onPress: () => navigation.goBack(),
+                  },
+                ],
+              );
+            } catch (error) {
+              console.error("Erro ao excluir livro:", error);
+
+              Alert.alert("Erro", "Não foi possível excluir o livro.");
+            }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -146,9 +153,7 @@ export default function EditBookScreen({ navigation, route }) {
           <View style={styles.headerText}>
             <Text style={styles.title}>Editar livro</Text>
 
-            <Text style={styles.subtitle}>
-              Atualize as informações
-            </Text>
+            <Text style={styles.subtitle}>Atualize as informações</Text>
           </View>
 
           <View style={styles.headerSpace} />
@@ -161,41 +166,26 @@ export default function EditBookScreen({ navigation, route }) {
             style={styles.coverContainer}
           >
             {capa ? (
-              <Image
-                source={{ uri: capa }}
-                style={styles.cover}
-              />
+              <Image source={{ uri: capa }} style={styles.cover} />
             ) : (
               <View style={styles.fakeCover}>
-                <Text style={styles.fakeCoverSmall}>
-                  LEITURA DE
-                </Text>
+                <Text style={styles.fakeCoverSmall}>LEITURA DE</Text>
 
-                <Text style={styles.fakeCoverTitle}>
-                  VERÃO
-                </Text>
+                <Text style={styles.fakeCoverTitle}>VERÃO</Text>
 
-                <Text style={styles.fakeCoverAuthor}>
-                  EMILY HENRY
-                </Text>
+                <Text style={styles.fakeCoverAuthor}>EMILY HENRY</Text>
               </View>
             )}
 
             <View style={styles.cameraButton}>
-              <Ionicons
-                name="camera-outline"
-                size={17}
-                color="#16778D"
-              />
+              <Ionicons name="camera-outline" size={17} color="#16778D" />
             </View>
           </TouchableOpacity>
         </View>
 
         {/* Título */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>
-            Título do livro
-          </Text>
+          <Text style={styles.fieldLabel}>Título do livro</Text>
 
           <TextInput
             style={styles.input}
@@ -228,31 +218,21 @@ export default function EditBookScreen({ navigation, route }) {
 
         {/* Status */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>
-            Status de leitura
-          </Text>
+          <Text style={styles.fieldLabel}>Status de leitura</Text>
 
           <TouchableOpacity
             style={styles.statusInput}
             onPress={() => setModalStatus(true)}
           >
-            <Text style={styles.statusText}>
-              {status}
-            </Text>
+            <Text style={styles.statusText}>{status}</Text>
 
-            <Ionicons
-              name="chevron-down"
-              size={16}
-              color="#888"
-            />
+            <Ionicons name="chevron-down" size={16} color="#888" />
           </TouchableOpacity>
         </View>
 
         {/* Data */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>
-            Data de início (opcional)
-          </Text>
+          <Text style={styles.fieldLabel}>Data de início (opcional)</Text>
 
           <TextInput
             style={styles.input}
@@ -263,9 +243,7 @@ export default function EditBookScreen({ navigation, route }) {
 
         {/* Notas */}
         <View style={styles.fieldContainer}>
-          <Text style={styles.fieldLabel}>
-            Notas (opcional)
-          </Text>
+          <Text style={styles.fieldLabel}>Notas (opcional)</Text>
 
           <TextInput
             style={[styles.input, styles.notesInput]}
@@ -278,28 +256,17 @@ export default function EditBookScreen({ navigation, route }) {
 
         {/* Botões */}
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={excluirLivro}
-          >
-            <Ionicons
-              name="trash-outline"
-              size={17}
-              color="#A76531"
-            />
+          <TouchableOpacity style={styles.deleteButton} onPress={excluirLivro}>
+            <Ionicons name="trash-outline" size={17} color="#A76531" />
 
-            <Text style={styles.deleteButtonText}>
-              Excluir livro
-            </Text>
+            <Text style={styles.deleteButtonText}>Excluir livro</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.saveButton}
             onPress={salvarAlteracoes}
           >
-            <Text style={styles.saveButtonText}>
-              Salvar alterações
-            </Text>
+            <Text style={styles.saveButtonText}>Salvar alterações</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -317,26 +284,20 @@ export default function EditBookScreen({ navigation, route }) {
           onPress={() => setModalStatus(false)}
         >
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>
-              Status de leitura
-            </Text>
+            <Text style={styles.modalTitle}>Status de leitura</Text>
 
-            {['Quero ler', 'Lendo', 'Concluído'].map(
-              (item) => (
-                <TouchableOpacity
-                  key={item}
-                  style={styles.statusOption}
-                  onPress={() => {
-                    setStatus(item);
-                    setModalStatus(false);
-                  }}
-                >
-                  <Text style={styles.statusOptionText}>
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              )
-            )}
+            {["Quero ler", "Lendo", "Concluído"].map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={styles.statusOption}
+                onPress={() => {
+                  setStatus(item);
+                  setModalStatus(false);
+                }}
+              >
+                <Text style={styles.statusOptionText}>{item}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </TouchableOpacity>
       </Modal>
@@ -347,7 +308,7 @@ export default function EditBookScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FBF7EF',
+    backgroundColor: "#FBF7EF",
   },
 
   scroll: {
@@ -357,19 +318,19 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 18,
   },
 
   backButton: {
     width: 40,
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
   },
 
   headerText: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
 
   headerSpace: {
@@ -378,73 +339,73 @@ const styles = StyleSheet.create({
 
   title: {
     fontSize: 17,
-    fontWeight: '700',
-    color: '#111',
+    fontWeight: "700",
+    color: "#111",
   },
 
   subtitle: {
     fontSize: 12,
-    color: '#777',
+    color: "#777",
     marginTop: 2,
   },
 
   coverArea: {
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     marginBottom: 20,
   },
 
   coverContainer: {
     width: 90,
     height: 125,
-    position: 'relative',
+    position: "relative",
   },
 
   cover: {
     width: 78,
     height: 115,
     borderRadius: 4,
-    resizeMode: 'cover',
+    resizeMode: "cover",
   },
 
   fakeCover: {
     width: 78,
     height: 115,
     borderRadius: 4,
-    backgroundColor: '#F3A500',
+    backgroundColor: "#F3A500",
     padding: 7,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
 
   fakeCoverSmall: {
     fontSize: 9,
-    fontWeight: '700',
-    color: '#fff',
+    fontWeight: "700",
+    color: "#fff",
   },
 
   fakeCoverTitle: {
     fontSize: 16,
-    fontWeight: '900',
-    color: '#fff',
+    fontWeight: "900",
+    color: "#fff",
   },
 
   fakeCoverAuthor: {
     fontSize: 7,
-    color: '#fff',
+    color: "#fff",
     marginTop: 15,
   },
 
   cameraButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     right: 0,
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: '#E5E5E5',
+    borderColor: "#E5E5E5",
   },
 
   fieldContainer: {
@@ -453,39 +414,39 @@ const styles = StyleSheet.create({
 
   fieldLabel: {
     fontSize: 10,
-    color: '#aaa',
+    color: "#aaa",
     marginLeft: 14,
     marginBottom: -7,
     zIndex: 2,
-    backgroundColor: '#FBF7EF',
-    alignSelf: 'flex-start',
+    backgroundColor: "#FBF7EF",
+    alignSelf: "flex-start",
     paddingHorizontal: 3,
   },
 
   input: {
     height: 44,
     borderWidth: 1,
-    borderColor: '#DDD6CC',
+    borderColor: "#DDD6CC",
     borderRadius: 9,
     paddingHorizontal: 14,
     fontSize: 13,
-    color: '#444',
+    color: "#444",
   },
 
   statusInput: {
     height: 44,
     borderWidth: 1,
-    borderColor: '#DDD6CC',
+    borderColor: "#DDD6CC",
     borderRadius: 9,
     paddingHorizontal: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
 
   statusText: {
     flex: 1,
     fontSize: 13,
-    color: '#444',
+    color: "#444",
   },
 
   notesInput: {
@@ -494,7 +455,7 @@ const styles = StyleSheet.create({
   },
 
   buttonsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 22,
     gap: 8,
   },
@@ -503,64 +464,63 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 44,
     borderWidth: 1,
-    borderColor: '#A76531',
+    borderColor: "#A76531",
     borderRadius: 13,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     gap: 6,
   },
-
   deleteButtonText: {
-    color: '#A76531',
+    color: "#A76531",
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 
   saveButton: {
     flex: 1.25,
     height: 44,
     borderRadius: 13,
-    backgroundColor: '#207D91',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#207D91",
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   saveButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 
   modalBackground: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
-    justifyContent: 'center',
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "center",
     paddingHorizontal: 40,
   },
 
   modalContainer: {
-    backgroundColor: '#FBF7EF',
+    backgroundColor: "#FBF7EF",
     borderRadius: 16,
     padding: 20,
   },
 
   modalTitle: {
     fontSize: 17,
-    fontWeight: '700',
-    textAlign: 'center',
+    fontWeight: "700",
+    textAlign: "center",
     marginBottom: 15,
   },
 
   statusOption: {
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
 
   statusOptionText: {
     fontSize: 14,
-    textAlign: 'center',
-    color: '#333',
+    textAlign: "center",
+    color: "#333",
   },
 });
