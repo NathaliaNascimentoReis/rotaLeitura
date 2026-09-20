@@ -96,43 +96,25 @@ export default function EditBookScreen({ navigation, route }) {
     }
   };
 
-  const excluirLivro = () => {
-    Alert.alert(
-      "Excluir livro",
-      `Tem certeza que deseja excluir "${livro.titulo}"?`,
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
+  const excluirLivro = async () => {
+    console.log("========== DELETE ==========");
+    console.log("Livro recebido:", livro);
+    console.log("ID recebido:", livro?.id);
 
-        {
-          text: "Excluir",
-          style: "destructive",
+    if (!livro?.id) {
+      console.error("ERRO: livro sem ID");
+      return;
+    }
 
-          onPress: async () => {
-            try {
-              await deleteBook(livro.id);
+    try {
+      await deleteBook(livro.id);
 
-              Alert.alert(
-                "Livro excluído",
-                "O livro foi removido da sua estante.",
-                [
-                  {
-                    text: "OK",
-                    onPress: () => navigation.goBack(),
-                  },
-                ],
-              );
-            } catch (error) {
-              console.error("Erro ao excluir livro:", error);
+      console.log("LIVRO EXCLUÍDO COM SUCESSO!");
 
-              Alert.alert("Erro", "Não foi possível excluir o livro.");
-            }
-          },
-        },
-      ],
-    );
+      navigation.goBack();
+    } catch (error) {
+      console.error("ERRO AO EXCLUIR LIVRO:", error);
+    }
   };
 
   return (
@@ -258,7 +240,6 @@ export default function EditBookScreen({ navigation, route }) {
         <View style={styles.buttonsContainer}>
           <TouchableOpacity style={styles.deleteButton} onPress={excluirLivro}>
             <Ionicons name="trash-outline" size={17} color="#A76531" />
-
             <Text style={styles.deleteButtonText}>Excluir livro</Text>
           </TouchableOpacity>
 
