@@ -42,13 +42,10 @@ A aplicação foi projetada com foco em experiência do usuário (UX/UI), utiliz
 
 ---
 
-## 🚀 Arquitetura e Tecnologias Sugeridas
+## 🚀 Tecnologias
 
-* **Front-end Mobile:** React Native (com Expo) / Flutter
-* **Linguagem:** TypeScript / Dart
-* **Estilização:** TailwindCSS (NativeWind) / Styled Components
-* **Gerenciamento de Estado:** React Context API / Redux / Zustand
-* **Armazenamento / Backend:** Firebase (Firestore & Authentication) ou API REST em Node.js com banco de dados PostgreSQL/MongoDB.
+* **Front-end Mobile:** React Native (com Expo)
+* **Linguagem:** JavaScript
 
 ---
 
@@ -59,7 +56,7 @@ Siga os passos abaixo para executar o projeto em ambiente de desenvolvimento loc
 ### 📋 Pré-requisitos
 
 * **Node.js** (versão 18 ou superior)
-* **npm** ou **yarn** instalado
+* **npm** instalado
 * **Expo Go** instalado no dispositivo móvel (Android/iOS) ou um emulador configurado (Android Studio / Xcode).
 
 ### 🔧 Passo a Passo
@@ -73,15 +70,11 @@ Siga os passos abaixo para executar o projeto em ambiente de desenvolvimento loc
 2. **Instalar as dependências:**
    ```bash
    npm install
-   # ou
-   yarn install
    ```
 
 3. **Iniciar o servidor de desenvolvimento:**
    ```bash
-   npx expo start
-   # ou
-   yarn start
+   npx expo start ou npm start
    ```
 
 4. **Executar na aplicação:**
